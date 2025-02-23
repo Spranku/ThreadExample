@@ -63,8 +63,47 @@ void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void AThreadExampleGameModeBase::CreateSimpleAtomicThread()
 {
-	FColor color;
-	// my first thread
-	class FSimpleAtomic_Runnable *MyRunnableClass_SimpleAtomic = new FSimpleAtomic_Runnable(color, this, 2000); // Thread with arguments
-	CurrentRunnableGameModeThread_SimpleAtomic.Add(FRunnableThread::Create(MyRunnableClass_SimpleAtomic, TEXT("SimpleAtomic thread"), 0, EThreadPriority::TPri_Normal));
+	for (int i =0; i < NumberOfThreadToCreate; ++i)
+	{
+		bool bIsFlag = false;
+		if (i % 2)
+			bIsFlag = true;
+
+		FColor color;
+		// my first thread
+		class FSimpleAtomic_Runnable *MyRunnableClass_SimpleAtomic = new FSimpleAtomic_Runnable(color, this, IterationRunnableCircle, bIsFlag, bIsUseAtomic); // Thread with arguments
+		CurrentRunnableGameModeThread_SimpleAtomic.Add(FRunnableThread::Create(MyRunnableClass_SimpleAtomic, TEXT("SimpleAtomic thread"), 0, EThreadPriority::TPri_Lowest));
+	}
+}
+
+void AThreadExampleGameModeBase::GetCounterSimpleAtomic(int32& Atomic1, int32& Atomic2, int32& NonAtomic1, int32& NonAtomic2)
+{
+	if (bIsUseAtomic)
+	{
+		
+		NonAtomic1 = FPlatformAtomics::AtomicRead(&NonAtomicCounter1); // Safe read data
+		NonAtomic2 = FPlatformAtomics::AtomicRead(&NonAtomicCounter2); // Safe read data
+
+		if (AtomicCounter1.is_lock_free())
+		{
+			Atomic1 = AtomicCounter1;
+		}
+		if (AtomicCounter2.is_lock_free())
+		{
+			Atomic2 = AtomicCounter2;
+		}
+	}
+	else
+	{
+		NonAtomic1 = NonAtomicCounter1;
+		NonAtomic2 = NonAtomicCounter2;
+	}
+}
+
+void AThreadExampleGameModeBase::ResetCounterSimpleAtomic()
+{
+	NonAtomicCounter1 = 0;
+	NonAtomicCounter2 = 0;
+	AtomicCounter1 = 0;
+	AtomicCounter2 = 0;
 }

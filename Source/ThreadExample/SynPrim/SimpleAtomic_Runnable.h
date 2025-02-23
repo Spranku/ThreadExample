@@ -11,7 +11,11 @@
 class THREADEXAMPLE_API FSimpleAtomic_Runnable : public FRunnable
 {
 public:
-	FSimpleAtomic_Runnable(FColor Color, AThreadExampleGameModeBase *OwnerActor, uint32 NeedIteration);
+	FSimpleAtomic_Runnable(FColor Color, 
+						   AThreadExampleGameModeBase *OwnerActor, 
+		                   uint32 NeedIteration, 
+		                   bool SeprateLogic, 
+		                   bool bIsUseAtomic);
 
 	virtual ~FSimpleAtomic_Runnable() override;
 
@@ -23,5 +27,14 @@ public:
 
 	virtual void Exit() override;
 
+	int NumberIteration = 0;
+
+	AThreadExampleGameModeBase* GameMode_Ref = nullptr;
+
+	bool bIsStopThread = false;
+
+	bool bUseAtomicFlag = true;
+
+	bool SeprateLogicFlag = false;
 
 };
