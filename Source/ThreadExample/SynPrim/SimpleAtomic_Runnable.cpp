@@ -62,7 +62,6 @@ uint32 FSimpleAtomic_Runnable::Run()
 			}
 		}
 	}
-
 	return 0;
 }
 
@@ -73,5 +72,6 @@ void FSimpleAtomic_Runnable::Stop()
 
 void FSimpleAtomic_Runnable::Exit()
 {
+	GameMode_Ref = nullptr;
 	UE_LOG(LogTemp, Error, TEXT("FSimpleAtomic_Runnable::Exit"));
 }
