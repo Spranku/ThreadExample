@@ -60,6 +60,48 @@ void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 }
+//////////////////////////////////////////////////// Counter ///////////////////////////////////////////////////////////////////////
+void AThreadExampleGameModeBase::StopSimpleCounterThread()
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		CurrentRunningGameModeThread_SimpleCounter->WaitForCompletion(); // Like detach() ; Wait during thread finish work
+		CurrentRunningGameModeThread_SimpleCounter = nullptr;
+	}
+}
+
+void AThreadExampleGameModeBase::KillSimpleCounterThread(bool bIsShouldWait)
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		CurrentRunningGameModeThread_SimpleCounter->Kill(bIsShouldWait);
+	}
+}
+
+void AThreadExampleGameModeBase::CreateSimpleCounterThread()
+{
+	if (!CurrentRunningGameModeThread_SimpleCounter)
+	{
+		if (!MyRunnableClass_SimpleCounter)
+		{
+			
+			MyRunnableClass_SimpleCounter = new FSimpleCounter_Runnable(ColorSimpleCounter, this);
+		}
+		CurrentRunningGameModeThread_SimpleCounter = FRunnableThread::Create(MyRunnableClass_SimpleCounter, TEXT("SimpleCounter Thread"), 0, EThreadPriority::TPri_Normal);
+	}
+}
+
+int64 AThreadExampleGameModeBase::GetSimpleCounterThread()
+{
+	int64 result = 0;
+	if (MyRunnableClass_SimpleCounter)
+	{
+		result = MyRunnableClass_SimpleCounter->Counter;
+	}
+	return result;
+}
+
+//////////////////////////////////////////////////// Atomic ///////////////////////////////////////////////////////////////////////
 
 void AThreadExampleGameModeBase::CreateSimpleAtomicThread()
 {
