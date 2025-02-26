@@ -54,12 +54,85 @@ void AThreadExampleGameModeBase::Tick(float DeltaTime)
 void AThreadExampleGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Check current Thread and stop it
+	StopSimpleCounterThread();
 }
 
 void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 }
+//////////////////////////////////////////////////// Counter ///////////////////////////////////////////////////////////////////////
+void AThreadExampleGameModeBase::StopSimpleCounterThread()
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		if (MyRunnableClass_SimpleCounter)
+		{
+			CurrentRunningGameModeThread_SimpleCounter->Suspend(false); // Is thread was paused - continue
+			// NOT SAFE
+			MyRunnableClass_SimpleCounter->bIsStopThread = true;
+			// SAFE
+			MyRunnableClass_SimpleCounter->bIsStopThreadSafe = true;
+
+			CurrentRunningGameModeThread_SimpleCounter->WaitForCompletion(); // Like detach() ; Wait during thread finish work
+			CurrentRunningGameModeThread_SimpleCounter = nullptr;
+			MyRunnableClass_SimpleCounter = nullptr;
+		}
+	}
+}
+
+void AThreadExampleGameModeBase::KillSimpleCounterThread(bool bIsShouldWait)
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		CurrentRunningGameModeThread_SimpleCounter->Suspend(false); // Is thread was paused - continue
+		CurrentRunningGameModeThread_SimpleCounter->Kill(bIsShouldWait);
+		CurrentRunningGameModeThread_SimpleCounter = nullptr;
+		MyRunnableClass_SimpleCounter = nullptr;
+	}
+}
+
+void AThreadExampleGameModeBase::CreateSimpleCounterThread()
+{
+	if (!CurrentRunningGameModeThread_SimpleCounter)
+	{
+		if (!MyRunnableClass_SimpleCounter)
+		{
+			MyRunnableClass_SimpleCounter = new FSimpleCounter_Runnable(ColorSimpleCounter, this, bUseSafeVariable);
+		}
+		CurrentRunningGameModeThread_SimpleCounter = FRunnableThread::Create(MyRunnableClass_SimpleCounter, TEXT("SimpleCounter Thread"), 0, EThreadPriority::TPri_Normal);
+	}
+}
+
+int64 AThreadExampleGameModeBase::GetSimpleCounterThread()
+{
+	int64 result = 0;
+	if (MyRunnableClass_SimpleCounter)
+	{
+		if (MyRunnableClass_SimpleCounter->bIsUseSafeVariable)
+		{
+			result = MyRunnableClass_SimpleCounter->CounterSafe.GetValue(); // Safe
+		}
+		else
+		{
+			result = MyRunnableClass_SimpleCounter->Counter; // Not safe
+		}
+	}
+	return result;
+}
+
+bool AThreadExampleGameModeBase::SwitchRunStateSimpleCounterThread(bool bIsPause)
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		CurrentRunningGameModeThread_SimpleCounter->Suspend(bIsPause); // Set pause for thread
+	}
+	return !bIsPause;
+}
+
+//////////////////////////////////////////////////// Atomic ///////////////////////////////////////////////////////////////////////
 
 void AThreadExampleGameModeBase::CreateSimpleAtomicThread()
 {

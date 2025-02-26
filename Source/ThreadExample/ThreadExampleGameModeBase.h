@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "HAL/ThreadingBase.h"
+#include "SynPrim/SimpleAtomic_Runnable.h"
+#include "SynPrim/SimpleCounter_Runnable.h"
 #include "ThreadExampleGameModeBase.generated.h"
 
 /**
@@ -22,6 +24,31 @@ public:
 
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
+	// SimpleCounter setting
+	UPROPERTY(BlueprintReadWrite)
+	bool bUseSafeVariable = true;
+
+	UPROPERTY(BlueprintReadWrite)
+	FColor ColorSimpleCounter;
+
+	class FSimpleCounter_Runnable* MyRunnableClass_SimpleCounter = nullptr;
+	FRunnableThread* CurrentRunningGameModeThread_SimpleCounter;
+	// SimpleCounter control
+	UFUNCTION(BlueprintCallable)
+	void StopSimpleCounterThread();
+
+	UFUNCTION(BlueprintCallable)
+	void KillSimpleCounterThread(bool bIsShouldWait);
+
+	UFUNCTION(BlueprintCallable)
+	void CreateSimpleCounterThread();
+
+	UFUNCTION(BlueprintCallable)
+	int64 GetSimpleCounterThread();
+
+	UFUNCTION(BlueprintCallable)
+	bool SwitchRunStateSimpleCounterThread(bool bIsPause);
+	
 	// SimpleAtomic setting
 	TArray<FRunnableThread*> CurrentRunnableGameModeThread_SimpleAtomic;
 
