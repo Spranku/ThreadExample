@@ -45,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int64 GetSimpleCounterThread();
+
+	UFUNCTION(BlueprintCallable)
+	bool SwitchRunStateSimpleCounterThread(bool bIsPause);
 	
 	// SimpleAtomic setting
 	TArray<FRunnableThread*> CurrentRunnableGameModeThread_SimpleAtomic;

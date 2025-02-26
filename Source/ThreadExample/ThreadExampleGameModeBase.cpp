@@ -70,6 +70,7 @@ void AThreadExampleGameModeBase::StopSimpleCounterThread()
 	{
 		if (MyRunnableClass_SimpleCounter)
 		{
+			CurrentRunningGameModeThread_SimpleCounter->Suspend(false); // Is thread was paused - continue
 			// NOT SAFE
 			MyRunnableClass_SimpleCounter->bIsStopThread = true;
 			// SAFE
@@ -77,6 +78,7 @@ void AThreadExampleGameModeBase::StopSimpleCounterThread()
 
 			CurrentRunningGameModeThread_SimpleCounter->WaitForCompletion(); // Like detach() ; Wait during thread finish work
 			CurrentRunningGameModeThread_SimpleCounter = nullptr;
+			MyRunnableClass_SimpleCounter = nullptr;
 		}
 	}
 }
@@ -85,7 +87,10 @@ void AThreadExampleGameModeBase::KillSimpleCounterThread(bool bIsShouldWait)
 {
 	if (CurrentRunningGameModeThread_SimpleCounter)
 	{
+		CurrentRunningGameModeThread_SimpleCounter->Suspend(false); // Is thread was paused - continue
 		CurrentRunningGameModeThread_SimpleCounter->Kill(bIsShouldWait);
+		CurrentRunningGameModeThread_SimpleCounter = nullptr;
+		MyRunnableClass_SimpleCounter = nullptr;
 	}
 }
 
@@ -116,6 +121,15 @@ int64 AThreadExampleGameModeBase::GetSimpleCounterThread()
 		}
 	}
 	return result;
+}
+
+bool AThreadExampleGameModeBase::SwitchRunStateSimpleCounterThread(bool bIsPause)
+{
+	if (CurrentRunningGameModeThread_SimpleCounter)
+	{
+		CurrentRunningGameModeThread_SimpleCounter->Suspend(bIsPause); // Set pause for thread
+	}
+	return !bIsPause;
 }
 
 //////////////////////////////////////////////////// Atomic ///////////////////////////////////////////////////////////////////////
