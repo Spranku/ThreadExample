@@ -11,7 +11,7 @@ class AThreadExampleGameModeBase;
 class THREADEXAMPLE_API FSimpleCounter_Runnable : public FRunnable
 {
 public:
-	FSimpleCounter_Runnable(FColor Color, AThreadExampleGameModeBase* OwnerActor);
+	FSimpleCounter_Runnable(FColor Color, AThreadExampleGameModeBase* OwnerActor, bool VariableMode);
 
 	~FSimpleCounter_Runnable();
 
@@ -23,8 +23,17 @@ public:
 
 	virtual void Exit() override;
 
+	// Setting
+	AThreadExampleGameModeBase* GameModeRef;
+
+	bool bIsUseSafeVariable;
+
 	// Not safe variable
 	bool bIsStopThread = false;
 
 	int64 Counter = 0;
+
+	// Safe variable has atomic type. Actually this is amotic variables. They safe for using with thread
+	FThreadSafeBool bIsStopThreadSafe = FThreadSafeBool(false); // Recomended to use Constuctor(), than  = false;
+	FThreadSafeCounter CounterSafe = FThreadSafeCounter(0);		// Recomended to use Constuctor(), than  = 0;
 };
