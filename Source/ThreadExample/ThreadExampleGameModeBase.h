@@ -32,7 +32,15 @@ public:
 	FColor ColorSimpleCounter;
 
 	class FSimpleCounter_Runnable* MyRunnableClass_SimpleCounter = nullptr;
-	FRunnableThread* CurrentRunningGameModeThread_SimpleCounter;
+	FRunnableThread* CurrentRunningGameModeThread_SimpleCounter = nullptr;
+
+	FEvent* SimpleCounterEvent;
+
+	FScopedEvent* SimpleCounterScopedEvent_Ref; \
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool bUseFEvent = true;
+
 	// SimpleCounter control
 	UFUNCTION(BlueprintCallable)
 	void StopSimpleCounterThread();
@@ -48,7 +56,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool SwitchRunStateSimpleCounterThread(bool bIsPause);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void StartSimpleCounterThreadWithEvent();
+
+	UFUNCTION(BlueprintCallable)
+	void StartSimpleCounterThreadWithScopedEvent();
+
 	// SimpleAtomic setting
 	TArray<FRunnableThread*> CurrentRunnableGameModeThread_SimpleAtomic;
 

@@ -76,6 +76,20 @@ void AThreadExampleGameModeBase::StopSimpleCounterThread()
 			// SAFE
 			MyRunnableClass_SimpleCounter->bIsStopThreadSafe = true;
 
+			if (SimpleCounterEvent)
+			{
+				SimpleCounterEvent->Trigger();
+				// Epic recomended to use this func for clear work cycle. It is important for Simple Counter Event, caus it should be success destroyed
+				FPlatformProcess::ReturnSynchEventToPool(SimpleCounterEvent); 
+				SimpleCounterEvent = nullptr;
+			}
+
+			if (SimpleCounterScopedEvent_Ref)
+			{
+				SimpleCounterScopedEvent_Ref->Trigger();
+				SimpleCounterScopedEvent_Ref = nullptr;
+			}
+
 			CurrentRunningGameModeThread_SimpleCounter->WaitForCompletion(); // Like detach() ; Wait during thread finish work
 			CurrentRunningGameModeThread_SimpleCounter = nullptr;
 			MyRunnableClass_SimpleCounter = nullptr;
@@ -96,6 +110,11 @@ void AThreadExampleGameModeBase::KillSimpleCounterThread(bool bIsShouldWait)
 
 void AThreadExampleGameModeBase::CreateSimpleCounterThread()
 {
+	if (bUseFEvent)
+	{
+		SimpleCounterEvent = FPlatformProcess::GetSynchEventFromPool(); // Create synch event
+	}
+
 	if (!CurrentRunningGameModeThread_SimpleCounter)
 	{
 		if (!MyRunnableClass_SimpleCounter)
@@ -130,6 +149,24 @@ bool AThreadExampleGameModeBase::SwitchRunStateSimpleCounterThread(bool bIsPause
 		CurrentRunningGameModeThread_SimpleCounter->Suspend(bIsPause); // Set pause for thread
 	}
 	return !bIsPause;
+}
+
+void AThreadExampleGameModeBase::StartSimpleCounterThreadWithEvent()
+{
+	if (SimpleCounterEvent)
+	{
+		SimpleCounterEvent->Trigger(); // This method unpouse thread and the thread continue work
+		// SimpleCounterEvent = nullptr; // Every call Triger() nedd to clear with nullptr
+	}
+}
+
+void AThreadExampleGameModeBase::StartSimpleCounterThreadWithScopedEvent()
+{
+	if (SimpleCounterScopedEvent_Ref)
+	{
+		SimpleCounterScopedEvent_Ref->Trigger();
+		SimpleCounterScopedEvent_Ref = nullptr; // Every call Triger() nedd to clear with nullptr
+	}
 }
 
 //////////////////////////////////////////////////// Atomic ///////////////////////////////////////////////////////////////////////
