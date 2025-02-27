@@ -21,6 +21,15 @@ bool FSimpleCounter_Runnable::Init()
 //	#pragma optimize("", off) // Off optimisation for thread loop. Now we can stop thread without lags
 uint32 FSimpleCounter_Runnable::Run()
 {
+	// FScopedEvent
+	if (GameModeRef->bUseScopedEvent)
+	{
+		{
+			FScopedEvent SimpleCounterScopedEvent;
+			GameModeRef->SendRef_ScopedEvent(SimpleCounterScopedEvent);
+		}
+	}
+
 	// FEvent
 	if (GameModeRef->SimpleCounterEvent)
 	{

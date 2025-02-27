@@ -63,6 +63,11 @@ void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 }
+
+void AThreadExampleGameModeBase::SendRef_ScopedEvent(FScopedEvent& ScopedEvent_Ref)
+{
+	SimpleCounterScopedEvent_Ref = &ScopedEvent_Ref;
+}
 //////////////////////////////////////////////////// Counter ///////////////////////////////////////////////////////////////////////
 void AThreadExampleGameModeBase::StopSimpleCounterThread()
 {

@@ -36,10 +36,15 @@ public:
 
 	FEvent* SimpleCounterEvent;
 
-	FScopedEvent* SimpleCounterScopedEvent_Ref; \
+	FScopedEvent* SimpleCounterScopedEvent_Ref; 
+
+	void SendRef_ScopedEvent(FScopedEvent& ScopedEvent_Ref);
 	
 	UPROPERTY(BlueprintReadWrite)
 	bool bUseFEvent = true;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bUseScopedEvent = true;
 
 	// SimpleCounter control
 	UFUNCTION(BlueprintCallable)
