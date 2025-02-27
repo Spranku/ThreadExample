@@ -9,6 +9,21 @@
 #include "SynPrim/SimpleCounter_Runnable.h"
 #include "ThreadExampleGameModeBase.generated.h"
 
+USTRUCT(BlueprintType, Atomic)
+struct FInfoNPC
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Id = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name = "none";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString SecondName = "none";
+};
+
 /**
  * 
  */
@@ -98,4 +113,42 @@ public:
 
 	int16 NonAtomicCounter2;
 	
+	// SimpleMutex setting
+ 
+	// Array of running threads. they generate data
+	TArray<FRunnableThread*> CurrentRunningGameModeThread_SimpleMutex; 
+
+	// Thread for save data
+	FRunnableThread* CurrentRunningGameModeThread_SimpleCOllectable;
+
+	UFUNCTION(BlueprintCallable)
+	void CreateSimpleMutexThread();
+
+	UFUNCTION(BlueprintCallable)
+	void CreateSimpleCollectableThread();
+
+	UFUNCTION(BlueprintCallable)
+	void StopSimpleMutexThreads();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FString> GetFirstNames();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FString> GetSecondNames();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FInfoNPC> GetNPCInfo();
+
+	// SimpleMutex storage
+	TArray<FString> FirstName;
+
+	FCriticalSection FirstNameMutex; // Since FirstName will be in threads running, need to use mutex for control
+
+	// TQueue - linked list for safe work with threads. 
+	// Work mode: Mpsc - Multiply producer, single consumer
+	// Work mode: Spsc - Single producer, single consumer
+	// Since SecondName will be work with any threads, need to use Mpsc work mode
+	TQueue<FString, EQueueMode::Mpsc> SecondName;
+
+	FColor ColorForThreads;
 };

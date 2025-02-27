@@ -4,6 +4,9 @@
 #include "ThreadExampleGameModeBase.h"
 #include "HAL/Thread.h"
 #include "SynPrim/SimpleAtomic_Runnable.h"
+#include "SynPrim/SimpleCounter_Runnable.h"
+#include "SynPrim/SimpleMutex_Runnable.h"
+#include "SynPrim/SimpleCollectable_Runnable.h"
 
 void AThreadExampleGameModeBase::Tick(float DeltaTime)
 {
@@ -62,6 +65,9 @@ void AThreadExampleGameModeBase::BeginPlay()
 void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	StopSimpleCounterThread();
+	StopSimpleMutexThreads();
 }
 
 void AThreadExampleGameModeBase::SendRef_ScopedEvent(FScopedEvent& ScopedEvent_Ref)
@@ -221,4 +227,66 @@ void AThreadExampleGameModeBase::ResetCounterSimpleAtomic()
 	NonAtomicCounter2 = 0;
 	AtomicCounter1 = 0;
 	AtomicCounter2 = 0;
+}
+
+//////////////////////////////////////////////////// Mutex ////////////////////////////////////////////////////\\*************************************
+
+void AThreadExampleGameModeBase::CreateSimpleMutexThread()
+{
+	for (int i =0; i < 4; ++i)
+	{
+		bool bFlag = false;
+		if (i % 2)
+		{
+			bFlag = true;
+		}
+		class FSimpleMutex_Runnable *MyRunnableClass_SimpleMutex = new FSimpleMutex_Runnable(ColorForThreads,this, bFlag);
+		CurrentRunningGameModeThread_SimpleMutex.Add(FRunnableThread::Create(MyRunnableClass_SimpleMutex, TEXT("SimpleMutex Thread"), 0, EThreadPriority::TPri_Lowest));
+	}
+}
+
+void AThreadExampleGameModeBase::CreateSimpleCollectableThread()
+{
+	class FSimpleCollectable_Runnable* MyRunnableClass_SimpleMutex = new FSimpleCollectable_Runnable(ColorForThreads, this);
+	CurrentRunningGameModeThread_SimpleMutex.Add(FRunnableThread::Create(MyRunnableClass_SimpleMutex, TEXT("SimpleCollectable Thread"), 0, EThreadPriority::TPri_Lowest));
+}
+
+
+void AThreadExampleGameModeBase::StopSimpleMutexThreads()
+{
+	if (CurrentRunningGameModeThread_SimpleMutex.Num() > 0)
+	{
+		for (auto RunnableThread : CurrentRunningGameModeThread_SimpleMutex)
+		{
+			if (RunnableThread)
+			{
+				RunnableThread->Kill(true);
+			}
+		}
+		CurrentRunningGameModeThread_SimpleMutex.Empty();
+	}
+
+	if (CurrentRunningGameModeThread_SimpleCOllectable)
+	{
+		CurrentRunningGameModeThread_SimpleCOllectable->Kill(true);
+		CurrentRunningGameModeThread_SimpleCOllectable = nullptr;
+	}
+}
+
+TArray<FString> AThreadExampleGameModeBase::GetFirstNames()
+{
+	TArray<FString> result;
+	return result;
+}
+
+TArray<FString> AThreadExampleGameModeBase::GetSecondNames()
+{
+	TArray<FString> result;
+	return result;
+}
+
+TArray<FInfoNPC> AThreadExampleGameModeBase::GetNPCInfo()
+{
+	TArray<FInfoNPC> result;
+	return result;
 }
