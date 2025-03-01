@@ -113,6 +113,11 @@ void FSimpleMutex_Runnable::Stop()
 
 void FSimpleMutex_Runnable::Exit()
 {
+	if (SenderEndPoint.IsValid())
+	{
+		SenderEndPoint.Reset();
+	}
+
 	GameMode_Ref = nullptr;
 }
 

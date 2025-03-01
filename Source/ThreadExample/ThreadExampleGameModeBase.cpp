@@ -94,6 +94,11 @@ void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 	StopSimpleCounterThread();
 	StopSimpleMutexThreads();
+
+	if (ReceiveEndPoint_NameGenerator.IsValid())
+	{
+		ReceiveEndPoint_NameGenerator.Reset();
+	}
 }
 
 void AThreadExampleGameModeBase::SendRef_ScopedEvent(FScopedEvent& ScopedEvent_Ref)
