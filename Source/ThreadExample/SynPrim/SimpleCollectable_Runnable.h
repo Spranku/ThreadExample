@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MessageEndpointBuilder.h"
 
 class AThreadExampleGameModeBase;
 
@@ -20,9 +21,14 @@ public:
 
 	virtual uint32 Run() override;
 
-	//virtual void Stop() override;
+	virtual void Stop() override;
 
 	virtual void Exit() override;
 
 	AThreadExampleGameModeBase* GameMode_Ref = nullptr;
+
+	FThreadSafeBool bIsStopCollectable = false;
+
+	// Work with widget.This thread will send info for spawnable actors
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> SenderEndPoint;
 };

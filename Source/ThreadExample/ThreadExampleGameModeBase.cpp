@@ -23,7 +23,7 @@ void AThreadExampleGameModeBase::BusMessageHandler_NPCInfo(const FInfoNPC& Messa
 														   const TSharedRef<IMessageContext, 
 														   ESPMode::ThreadSafe>& Context)
 {
-	
+	EventMessage_NPCInfo(Message);
 }
 
 void AThreadExampleGameModeBase::Tick(float DeltaTime)
@@ -86,6 +86,14 @@ void AThreadExampleGameModeBase::BeginPlay()
 	{
 		ReceiveEndPoint_NameGenerator->Subscribe<FBusStructMessage_NameGenerator>();
 	}
+
+	ReceiveEndPoint_NPCInfo = FMessageEndpoint::Builder("Receiver_AThreadExampleGameModeBase").Handling<FInfoNPC>(this, &AThreadExampleGameModeBase::BusMessageHandler_NPCInfo);
+
+	if (ReceiveEndPoint_NPCInfo.IsValid())
+	{
+		ReceiveEndPoint_NPCInfo->Subscribe<FInfoNPC>();
+	}
+
 }
 
 void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -98,6 +106,11 @@ void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 	if (ReceiveEndPoint_NameGenerator.IsValid())
 	{
 		ReceiveEndPoint_NameGenerator.Reset();
+	}
+
+	if (ReceiveEndPoint_NPCInfo.IsValid())
+	{
+		ReceiveEndPoint_NPCInfo.Reset();
 	}
 }
 
@@ -340,5 +353,5 @@ void AThreadExampleGameModeBase::EventMessage_NameGenerator(bool bIsSecondName, 
 
 void AThreadExampleGameModeBase::EventMessage_NPCInfo(FInfoNPC NPCData)
 {
-
+	OnUpdateByThreadNPC.Broadcast(NPCData);
 }

@@ -197,5 +197,9 @@ public:
 	
 	TArray<FString> CurrentSecondName;
 
+	TArray<FInfoNPC> NPCInfo;
+
+	FCriticalSection NPCInfoMutex;
+
 	FColor ColorForThreads;
 };
