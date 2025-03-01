@@ -36,4 +36,5 @@ public:
 	// Safe variable has atomic type. Actually this is amotic variables. They safe for using with thread
 	FThreadSafeBool bIsStopThreadSafe = FThreadSafeBool(false); // Recomended to use Constuctor(), than  = false;
 	FThreadSafeCounter CounterSafe = FThreadSafeCounter(0);		// Recomended to use Constuctor(), than  = 0;
+
 };
