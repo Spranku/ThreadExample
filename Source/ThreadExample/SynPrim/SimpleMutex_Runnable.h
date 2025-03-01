@@ -20,9 +20,17 @@ public:
 
 	virtual uint32 Run() override;
 
-	//virtual void Stop() override;
+	virtual void Stop() override;
 
 	virtual void Exit() override;
 
 	AThreadExampleGameModeBase* GameMode_Ref = nullptr;
+
+	bool bIsGenerateSecondName;
+
+	FThreadSafeBool bIsStopNameGenerator = false;
+
+	int8 GetRandom(int8 min, int8 max);
+
+	bool GetRandom();
 };

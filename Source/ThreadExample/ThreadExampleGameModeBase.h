@@ -140,7 +140,7 @@ public:
 	TArray<FInfoNPC> GetNPCInfo();
 
 	// SimpleMutex storage
-	TArray<FString> FirstName;
+	TArray<FString> FirstNames;
 
 	FCriticalSection FirstNameMutex; // Since FirstName will be in threads running, need to use mutex for control
 
@@ -149,6 +149,8 @@ public:
 	// Work mode: Spsc - Single producer, single consumer
 	// Since SecondName will be work with any threads, need to use Mpsc work mode
 	TQueue<FString, EQueueMode::Mpsc> SecondName;
+	
+	TArray<FString> CurrentSecondName;
 
 	FColor ColorForThreads;
 };

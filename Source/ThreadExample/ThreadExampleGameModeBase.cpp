@@ -275,14 +275,25 @@ void AThreadExampleGameModeBase::StopSimpleMutexThreads()
 
 TArray<FString> AThreadExampleGameModeBase::GetFirstNames()
 {
-	TArray<FString> result;
-	return result;
+	
+	return FirstNames;
 }
 
+// All the names that the threads have written to the array
 TArray<FString> AThreadExampleGameModeBase::GetSecondNames()
 {
 	TArray<FString> result;
-	return result;
+	FString OneRead;
+
+	while (SecondName.Dequeue(OneRead))
+	{
+		result.Add(OneRead);
+	}
+
+	// This array need because TQueue remove item. So need to save current item in simple array
+	CurrentSecondName.Append(result);
+
+	return CurrentSecondName;
 }
 
 TArray<FInfoNPC> AThreadExampleGameModeBase::GetNPCInfo()
