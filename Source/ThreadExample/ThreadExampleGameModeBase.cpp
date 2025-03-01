@@ -7,6 +7,8 @@
 #include "SynPrim/SimpleCounter_Runnable.h"
 #include "SynPrim/SimpleMutex_Runnable.h"
 #include "SynPrim/SimpleCollectable_Runnable.h"
+#include "Misc/ScopeLock.h"
+#include "DumpCuteCube.h"
 #include "MessageEndpointBuilder.h"
 
 void AThreadExampleGameModeBase::BusMessageHandler_NameGenerator(const FBusStructMessage_NameGenerator& Message,
@@ -319,8 +321,10 @@ void AThreadExampleGameModeBase::StopSimpleMutexThreads()
 
 TArray<FString> AThreadExampleGameModeBase::GetFirstNames()
 {
-	
-	return FirstNames;
+	{
+		FScopeLock myScopedLock(&FirstNameMutex);
+		return FirstNames;
+	}
 }
 
 // All the names that the threads have written to the array
@@ -354,4 +358,22 @@ void AThreadExampleGameModeBase::EventMessage_NameGenerator(bool bIsSecondName, 
 void AThreadExampleGameModeBase::EventMessage_NPCInfo(FInfoNPC NPCData)
 {
 	OnUpdateByThreadNPC.Broadcast(NPCData);
+	
+	// Spawn cube
+	UWorld* myWorld = GetWorld();
+	if (myWorld && SpawnObjectThread)
+	{
+		
+		// float randFloat = FMath::FRandRange(10.0f, 50.0f);
+		FVector SpawnLoc = FVector(800.0f, 100.0f * cubeCout /* + randFloat */, 100.0f);
+		FRotator SpawnRot;
+		ADumpCuteCube *myCuteCube;
+		myCuteCube = Cast<ADumpCuteCube>(myWorld->SpawnActor(SpawnObjectThread, &SpawnLoc, &SpawnRot, FActorSpawnParameters()));
+		if (myCuteCube)
+		{
+			myCuteCube->Init(NPCData);
+			cubeCout++;
+		}
+	}
+
 }

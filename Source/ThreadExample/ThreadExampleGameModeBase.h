@@ -11,6 +11,8 @@
 #include "MessageEndpoint.h"
 #include "ThreadExampleGameModeBase.generated.h"
 
+class ADumpCuteCube;
+
 USTRUCT(BlueprintType)
 struct FInfoNPC
 {
@@ -202,4 +204,9 @@ public:
 	FCriticalSection NPCInfoMutex;
 
 	FColor ColorForThreads;
+
+	int32 cubeCout = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class ADumpCuteCube> SpawnObjectThread;
 };
