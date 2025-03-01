@@ -4,11 +4,14 @@
 #include "SimpleMutex_Runnable.h"
 #include "ThreadExample/ThreadExampleGameModeBase.h"
 #include "random"
+#include "MessageEndpointBuilder.h"
 
 FSimpleMutex_Runnable::FSimpleMutex_Runnable(FColor Color, AThreadExampleGameModeBase* OwnerActor, bool bIsSecondMode)
 {
 	GameMode_Ref = OwnerActor;
 	bIsGenerateSecondName = bIsSecondMode;
+
+	SenderEndPoint = FMessageEndpoint::Builder("Sender_FSimpleMutex_Runnable").Build();
 }
 
 FSimpleMutex_Runnable::~FSimpleMutex_Runnable()
@@ -92,6 +95,12 @@ uint32 FSimpleMutex_Runnable::Run()
 			GameMode_Ref->FirstNames.Add(Result); // Not safe for threads
 
 			GameMode_Ref->FirstNameMutex.Unlock();
+		}
+
+		if (SenderEndPoint.IsValid())
+		{
+			// Send message 
+			SenderEndPoint->Publish<FBusStructMessage_NameGenerator>(new FBusStructMessage_NameGenerator(bIsGenerateSecondName, Result));
 		}
 	}
 	return 1;

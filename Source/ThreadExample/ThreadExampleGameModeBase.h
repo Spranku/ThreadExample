@@ -7,9 +7,11 @@
 #include "HAL/ThreadingBase.h"
 #include "SynPrim/SimpleAtomic_Runnable.h"
 #include "SynPrim/SimpleCounter_Runnable.h"
+#include "IMessageBus.h"
+#include "MessageEndpoint.h"
 #include "ThreadExampleGameModeBase.generated.h"
 
-USTRUCT(BlueprintType, Atomic)
+USTRUCT(BlueprintType)
 struct FInfoNPC
 {
 	GENERATED_BODY()
@@ -24,6 +26,26 @@ struct FInfoNPC
 	FString SecondName = "none";
 };
 
+USTRUCT()
+struct FBusStructMessage_NameGenerator
+{
+	GENERATED_BODY()
+
+	bool bIsSecondName = false;
+
+	FString TextName = "none";
+
+	FBusStructMessage_NameGenerator(bool InBool = false, FString InText = "None") : bIsSecondName(InBool), TextName(InText) {}
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateByNameGeneratorThreads,
+											 bool,
+											 bIsSecondFString,
+											 FString,
+											 StringData);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateByThreadNPC, FInfoNPC, DataNPC);
+
 /**
  * 
  */
@@ -33,6 +55,24 @@ class THREADEXAMPLE_API AThreadExampleGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnUpdateByNameGeneratorThreads OnUpdateByNameGeneratorThreads;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnUpdateByThreadNPC OnUpdateByThreadNPC;
+
+	void BusMessageHandler_NameGenerator(const struct FBusStructMessage_NameGenerator& Message, 
+										 const TSharedRef<IMessageContext, 
+									     ESPMode::ThreadSafe>& Context);
+
+	void BusMessageHandler_NPCInfo(const struct FInfoNPC& Message,
+								   const TSharedRef<IMessageContext,
+								   ESPMode::ThreadSafe>& Context);
+
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ReceiveEndPoint_NameGenerator;
+
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ReceiveEndPoint_NPCInfo;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginPlay() override;
@@ -138,6 +178,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FInfoNPC> GetNPCInfo();
+
+
+	void EventMessage_NameGenerator(bool bIsSecondName, FString StringData);
+
+	void EventMessage_NPCInfo(FInfoNPC NPCData);
 
 	// SimpleMutex storage
 	TArray<FString> FirstNames;

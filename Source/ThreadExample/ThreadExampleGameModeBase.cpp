@@ -7,6 +7,24 @@
 #include "SynPrim/SimpleCounter_Runnable.h"
 #include "SynPrim/SimpleMutex_Runnable.h"
 #include "SynPrim/SimpleCollectable_Runnable.h"
+#include "MessageEndpointBuilder.h"
+
+void AThreadExampleGameModeBase::BusMessageHandler_NameGenerator(const FBusStructMessage_NameGenerator& Message,
+																 const TSharedRef<IMessageContext, 
+																 ESPMode::ThreadSafe>& Context)
+{
+	// Message receiver
+	// Here we can give message from other thread
+	EventMessage_NameGenerator(Message.bIsSecondName, Message.TextName);
+	
+}
+
+void AThreadExampleGameModeBase::BusMessageHandler_NPCInfo(const FInfoNPC& Message,
+														   const TSharedRef<IMessageContext, 
+														   ESPMode::ThreadSafe>& Context)
+{
+	
+}
 
 void AThreadExampleGameModeBase::Tick(float DeltaTime)
 {
@@ -59,7 +77,15 @@ void AThreadExampleGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	// Check current Thread and stop it
-	StopSimpleCounterThread();
+	//StopSimpleCounterThread();
+
+	ReceiveEndPoint_NameGenerator = FMessageEndpoint::Builder("Receiver_AThreadExampleGameModeBase").Handling<FBusStructMessage_NameGenerator>(this,&AThreadExampleGameModeBase::BusMessageHandler_NameGenerator);
+
+	// Subscribe for messages
+	if (ReceiveEndPoint_NameGenerator.IsValid())
+	{
+		ReceiveEndPoint_NameGenerator->Subscribe<FBusStructMessage_NameGenerator>();
+	}
 }
 
 void AThreadExampleGameModeBase::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -300,4 +326,14 @@ TArray<FInfoNPC> AThreadExampleGameModeBase::GetNPCInfo()
 {
 	TArray<FInfoNPC> result;
 	return result;
+}
+
+void AThreadExampleGameModeBase::EventMessage_NameGenerator(bool bIsSecondName, FString StringData)
+{
+	OnUpdateByNameGeneratorThreads.Broadcast(bIsSecondName, StringData);
+}
+
+void AThreadExampleGameModeBase::EventMessage_NPCInfo(FInfoNPC NPCData)
+{
+
 }

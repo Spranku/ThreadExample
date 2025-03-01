@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IMessageBus.h"
+#include "MessageEndpoint.h"
 
 
 class AThreadExampleGameModeBase;
@@ -33,4 +35,6 @@ public:
 	int8 GetRandom(int8 min, int8 max);
 
 	bool GetRandom();
+
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> SenderEndPoint;
 };
