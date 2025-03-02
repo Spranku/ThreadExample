@@ -371,6 +371,7 @@ void AThreadExampleGameModeBase::EventMessage_NPCInfo(FInfoNPC NPCData)
 		myCuteCube = Cast<ADumpCuteCube>(myWorld->SpawnActor(SpawnObjectThread, &SpawnLoc, &SpawnRot, FActorSpawnParameters()));
 		if (myCuteCube)
 		{
+			NPCData.Color = FColor(FMath::RandRange(0.0f,255.0f), FMath::RandRange(0.0f, 255.0f), FMath::RandRange(0.0f, 255.0f), 255);
 			myCuteCube->Init(NPCData);
 			cubeCout++;
 		}
