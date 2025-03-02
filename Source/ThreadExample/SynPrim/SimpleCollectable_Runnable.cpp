@@ -26,6 +26,7 @@ uint32 FSimpleCollectable_Runnable::Run()
 		FInfoNPC newNPC;
 		newNPC.Id = i;
 		i++;
+		newNPC.Age = FMath::Rand();
 
 		int32 sizeNames = GameMode_Ref->FirstNames.Num();
 

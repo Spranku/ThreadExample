@@ -26,6 +26,12 @@ struct FInfoNPC
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString SecondName = "none";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Age = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FColor Color;
 };
 
 USTRUCT()
