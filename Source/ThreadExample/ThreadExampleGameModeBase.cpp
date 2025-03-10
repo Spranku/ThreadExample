@@ -376,3 +376,57 @@ void AThreadExampleGameModeBase::EventMessage_NPCInfo(FInfoNPC NPCData)
 	}
 
 }
+
+// Parallel For
+void AThreadExampleGameModeBase::StartParallell()
+{
+	FCriticalSection ParallelMutex;
+
+	ParallelFor(10, [&](int32 index)
+		{
+			FPlatformProcess::Sleep(0.001f);
+			int32 Cout = 0;
+			for (int i =0; i < 50; ++i)
+			{
+				Cout++;
+			}
+
+			ParallelMutex.Lock();
+			ParallelCout1 += Cout;
+			ParallelMutex.Unlock();
+
+		}), EParallelForFlags::BackgroundPriority;
+}
+
+void AThreadExampleGameModeBase::StartParallell2()
+{
+	const auto Function = [&](int32 index)
+		{
+			FPlatformProcess::Sleep(0.1f);
+			int32 Cout = 0;
+			for (int i = 0; i < 50; ++i)
+			{
+				Cout++;
+			}
+			ParallelCout2 += Cout;
+		};
+
+	ParallelForTemplate(10,Function, EParallelForFlags::BackgroundPriority);
+}
+
+void AThreadExampleGameModeBase::StartParallell3()
+{
+	ParallelForWithPreWork(10, [&](int32 index)
+		{
+			for (int i = 0; i < 50; ++i)
+			{
+				ParallelCout3++;
+				UE_LOG(LogTemp, Error, TEXT(" I Start ParallelFor WithPreWork"));
+			}
+		}, []()
+			{
+				UE_LOG(LogTemp, Error, TEXT(" I Start Help Work"));
+			//	FPlatformProcess::Sleep(5.0f);
+				UE_LOG(LogTemp, Error, TEXT(" I Finish Help Work"));
+			},EParallelForFlags::BackgroundPriority);
+}

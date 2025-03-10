@@ -215,4 +215,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADumpCuteCube> SpawnObjectThread;
+
+	//Parallel Fo
+	UFUNCTION(BlueprintCallable)
+	void StartParallell();
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 ParallelCout1 = 0;
+
+	UFUNCTION(BlueprintCallable)
+	void StartParallell2();
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 ParallelCout2 = 0;
+
+	UFUNCTION(BlueprintCallable)
+	void StartParallell3();
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 ParallelCout3 = 0;
 };
