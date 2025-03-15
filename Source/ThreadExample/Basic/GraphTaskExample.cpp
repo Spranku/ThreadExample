@@ -26,7 +26,7 @@ void AGraphTaskExample::BeginPlay()
 	TaskDelegate.BindUFunction(this, FName("OnWorkDone"));
 
 	AThreadExampleGameModeBase* myGameModeRef = Cast<AThreadExampleGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	TGraphTask<FTask_CounterWork>::CreateTask(nullptr, ENamedThreads::AnyThread).ConstructAndDispatchWhenReady(TaskDelegate, myGameModeRef, &Counter, 15);
+	myCurrentTask = TGraphTask<FTask_CounterWork>::CreateTask(nullptr, ENamedThreads::AnyThread).ConstructAndHold(TaskDelegate, myGameModeRef, &Counter);
 }
 
 // Called every frame
@@ -43,6 +43,25 @@ void AGraphTaskExample::OnWorkDone_BP_Implementation(int32 Result)
 
 void AGraphTaskExample::OnWorkDone(int32 Result)
 {
+	myCurrentTask = nullptr;
 	OnWorkDone_BP(Result);
 }
+
+void AGraphTaskExample::StartAsyncWork()
+{
+	if (myCurrentTask)
+	{
+		if (!myCurrentTask->GetCompletionEvent().IsValid())
+		{
+			myCurrentTask->Unlock();
+		}
+	}
+	else
+	{
+		AThreadExampleGameModeBase* myGameModeRef = Cast<AThreadExampleGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+		TGraphTask<FTask_CounterWork>::CreateTask(nullptr, ENamedThreads::AnyThread).ConstructAndDispatchWhenReady(TaskDelegate, myGameModeRef, &Counter);
+	}
+}
+
+
 

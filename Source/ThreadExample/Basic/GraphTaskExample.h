@@ -10,20 +10,58 @@
 DECLARE_DELEGATE_OneParam(FTaskDelegate_OnWorkDone, int32 OutputResult)
 
 #pragma optimize("",off)
+
+class FTask_FinishWork
+{
+	FTaskDelegate_OnWorkDone TaskDelegate_OnWorkDone;
+	AThreadExampleGameModeBase* GameModeRef;
+	int32 Result;
+public:
+	FTask_FinishWork(FTaskDelegate_OnWorkDone InTaskDelegate_OnWorkDone,
+					AThreadExampleGameModeBase* InGameModeRef,
+					int32 InResult) : TaskDelegate_OnWorkDone(InTaskDelegate_OnWorkDone),
+					GameModeRef(InGameModeRef),
+					Result(InResult)
+	{
+	}
+
+	~FTask_FinishWork()
+	{
+	}
+
+	FORCEINLINE TStatId GetStatId() const
+	{
+		RETURN_QUICK_DECLARE_CYCLE_STAT(FTask_FinishWork, STATGROUP_TaskGraphTasks);
+	}
+
+	static ENamedThreads::Type GetDesiredThread()
+	{
+		return ENamedThreads::GameThread;
+	}
+
+	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::FireAndForget; }
+
+	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& MyCompletionGraphEvent)
+	{
+		check(IsInGameThread())
+		if(TaskDelegate_OnWorkDone.IsBound())
+		{
+			TaskDelegate_OnWorkDone.Execute(Result);
+		}
+	}
+};
+/// /////////////////////////////////////////////////////////////////////////////////////////
 class FTask_CounterWork
 {
 	FTaskDelegate_OnWorkDone TaskDelegate_OnWorkDone;
 	AThreadExampleGameModeBase* GameModeRef;
 	int32 *SimpleOutput;
-	int32 Number;
 public:
-	FTask_CounterWork(FTaskDelegate_OnWorkDone InTaskDelegate_OnWorkDone, 
+	FTask_CounterWork(FTaskDelegate_OnWorkDone InTaskDelegate_OnWorkDone,
 					AThreadExampleGameModeBase *InGameModeRef, 
-					int32 * InSimpleOutput, 
-					int32 InNumber) : TaskDelegate_OnWorkDone(InTaskDelegate_OnWorkDone),
+					int32 * InSimpleOutput) : TaskDelegate_OnWorkDone(InTaskDelegate_OnWorkDone),
 					GameModeRef(InGameModeRef),
-					SimpleOutput(InSimpleOutput),
-					Number(InNumber)
+					SimpleOutput(InSimpleOutput)
 	{
 		UE_LOG(LogTemp, Error, TEXT("FTask_SimpleWork Cons"));
 		// Usually the constructor doesn't do anything except save the arguments for use in DoWork or GetDesiredThread.
@@ -36,7 +74,7 @@ public:
 	}
 	FORCEINLINE TStatId GetStatId() const
 	{
-		RETURN_QUICK_DECLARE_CYCLE_STAT(FTaskCounterWork, STATGROUP_TaskGraphTasks);
+		RETURN_QUICK_DECLARE_CYCLE_STAT(FTask_CounterWork, STATGROUP_TaskGraphTasks);
 	}
 
 	static ENamedThreads::Type GetDesiredThread()
@@ -61,13 +99,10 @@ public:
 			*SimpleOutput = (*SimpleOutput + 1);
 			i++;
 		}
-
-		// The arguments are useful for setting up other tasks. 
-		// Do work here, probably using SomeArgument.
-
-		MyCompletionGraphEvent->DontCompleteUntil(TGraphTask<FSomeChildTask>::CreateTask(NULL, CurrentThread).ConstructAndDispatchWhenReady());
+		TGraphTask<FTask_FinishWork>::CreateTask(nullptr, CurrentThread).ConstructAndDispatchWhenReady(TaskDelegate_OnWorkDone, GameModeRef,*SimpleOutput);
 	}
 };
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UCLASS()
 class THREADEXAMPLE_API AGraphTaskExample : public AActor
@@ -96,6 +131,11 @@ public:
 
 	UFUNCTION()
 	void OnWorkDone(int32 Result);
+
+	TGraphTask<FTask_CounterWork>* myCurrentTask;
+
+	UFUNCTION(BlueprintCallable)
+	void StartAsyncWork();
 
 };
 #pragma optimize("",on)
