@@ -54,25 +54,28 @@ void AMazeGenerator::VisualizeMaze()
 {
     if (!WallBlueprint || !FloorBlueprint) return;
 
+    // Получаем позицию актора MazeGenerator
+    FVector MazeOrigin = GetActorLocation();
+
     for (int32 y = 0; y < MazeHeight; y++)
     {
         for (int32 x = 0; x < MazeWidth; x++)
         {
             // Пол
-            FVector FloorLocation = FVector(x * CellSize, y * CellSize, 0);
+            FVector FloorLocation = MazeOrigin + FVector(x * CellSize, y * CellSize, 0);
             GetWorld()->SpawnActor<AActor>(FloorBlueprint, FloorLocation, FRotator::ZeroRotator);
 
             // Правая стена
             if (Maze[y][x].RightWall)
             {
-                FVector WallLocation = FVector((x + 0.5) * CellSize, y * CellSize, 0);
+                FVector WallLocation = MazeOrigin + FVector((x + 0.5) * CellSize, y * CellSize, 0);
                 GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
             }
 
             // Нижняя стена
             if (Maze[y][x].BottomWall)
             {
-                FVector WallLocation = FVector(x * CellSize, (y + 0.5) * CellSize, 0);
+                FVector WallLocation = MazeOrigin + FVector(x * CellSize, (y + 0.5) * CellSize, 0);
                 GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
             }
         }
