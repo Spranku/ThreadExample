@@ -57,6 +57,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
     float CellSize;
 
+    // Задержка спавна
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+    float Delay;
+
     // Лабиринт (двумерный массив ячеек)
     TArray<TArray<FCell>> Maze;
 
@@ -77,4 +81,7 @@ public:
 
     // Объединение множеств
     void MergeSets(TArray<FCell>& Row, int32 SetID1, int32 SetID2);
+
+    UFUNCTION()
+    void StartSpawning();
 };

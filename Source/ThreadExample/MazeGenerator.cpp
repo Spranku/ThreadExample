@@ -16,8 +16,7 @@ void AMazeGenerator::BeginPlay()
 {
 	Super::BeginPlay();
     GenerateMaze();
-    VisualizeMaze();
-	
+    StartSpawning();
 }
 
 // Called every frame
@@ -48,38 +47,6 @@ void AMazeGenerator::GenerateMaze()
     }
 
     FinalizeMaze();
-}
-
-void AMazeGenerator::VisualizeMaze()
-{
-    if (!WallBlueprint || !FloorBlueprint) return;
-
-    // Получаем позицию актора MazeGenerator
-    FVector MazeOrigin = GetActorLocation();
-
-    for (int32 y = 0; y < MazeHeight; y++)
-    {
-        for (int32 x = 0; x < MazeWidth; x++)
-        {
-            // Пол
-            FVector FloorLocation = MazeOrigin + FVector(x * CellSize, y * CellSize, 0);
-            GetWorld()->SpawnActor<AActor>(FloorBlueprint, FloorLocation, FRotator::ZeroRotator);
-
-            // Правая стена
-            if (Maze[y][x].RightWall)
-            {
-                FVector WallLocation = MazeOrigin + FVector((x + 0.5) * CellSize, y * CellSize, 0);
-                GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
-            }
-
-            // Нижняя стена
-            if (Maze[y][x].BottomWall)
-            {
-                FVector WallLocation = MazeOrigin + FVector(x * CellSize, (y + 0.5) * CellSize, 0);
-                GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
-            }
-        }
-    }
 }
 
 void AMazeGenerator::InitializeFirstRow(TArray<FCell>& Row)
@@ -182,5 +149,40 @@ void AMazeGenerator::MergeSets(TArray<FCell>& Row, int32 SetID1, int32 SetID2)
             Cell.SetID = SetID1; // Объединяем множества
         }
     }
+}
+
+void AMazeGenerator::StartSpawning()
+{
+    AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [this]()
+        {
+            for (int32 y = 0; y < MazeHeight; y++)
+            {
+                for (int32 x = 0; x < MazeWidth; x++)
+                {
+                    // Задержка
+                    FPlatformProcess::Sleep(Delay); // секунды задержки
+
+                    // Передача данных в главный поток для спавна
+                    AsyncTask(ENamedThreads::GameThread, [this, x, y]()
+                        {
+                            FVector MazeOrigin = GetActorLocation();
+                            FVector FloorLocation = MazeOrigin + FVector(x * CellSize, y * CellSize, 0);
+                            GetWorld()->SpawnActor<AActor>(FloorBlueprint, FloorLocation, FRotator::ZeroRotator);
+
+                            if (Maze[y][x].RightWall)
+                            {
+                                FVector WallLocation = MazeOrigin + FVector((x + 0.5) * CellSize, y * CellSize, 0);
+                                GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
+                            }
+
+                            if (Maze[y][x].BottomWall)
+                            {
+                                FVector WallLocation = MazeOrigin + FVector(x * CellSize, (y + 0.5) * CellSize, 0);
+                                GetWorld()->SpawnActor<AActor>(WallBlueprint, WallLocation, FRotator::ZeroRotator);
+                            }
+                        });
+                }
+            }
+        });
 }
 
